@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvamos a conquistarnos</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: Georgia, "Times New Roman", serif;
+    background:
+        radial-gradient(circle at 50% 30%, #4a202c 0%, transparent 42%),
+        radial-gradient(circle at 20% 80%, #261019 0%, transparent 35%),
+        linear-gradient(145deg, #0d070a, #1b0c12 55%, #090507);
+    color: #f7e8e4;
+}
+
+/* =====================================================
+   PANTALLAS
+===================================================== */
+
+.screen {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity .8s ease,
+        visibility .8s ease;
+}
+
+.screen.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+
+/* =====================================================
+   SOBRE / CARTA INICIAL
+===================================================== */
+
+.letter-scene {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+}
+
+/* pequeña luz detrás del sobre */
+
+.letter-scene::before {
+    content: "";
+    position: absolute;
+
+    width: 420px;
+    height: 420px;
+
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle,
+        rgba(170, 73, 91, .17),
+        transparent 68%
+    );
+
+    filter: blur(15px);
+}
+
+/* SOBRE */
+
+.envelope {
+    position: relative;
+
+    width: 330px;
+    height: 220px;
+
+    cursor: pointer;
+
+    perspective: 1000px;
+
+    filter:
+        drop-shadow(0 20px 25px rgba(0,0,0,.45))
+        drop-shadow(0 0 25px rgba(150,55,75,.08));
+
+    z-index: 2;
+}
+
+/* cuerpo */
+
+.envelope-body {
+    position: absolute;
+
+    inset: 0;
+
+    overflow: hidden;
+
+    border-radius: 8px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f4ddd2,
+            #e5c8bd 45%,
+            #cba49a
+        );
+
+    box-shadow:
+        inset 0 0 0 1px rgba(100,50,50,.15),
+        inset 0 -15px 25px rgba(90,40,40,.08);
+
+    z-index: 2;
+}
+
+/* textura interior */
+
+.envelope-body::before {
+    content: "";
+
+    position: absolute;
+
+    width: 240px;
+    height: 240px;
+
+    left: -160px;
+    bottom: -115px;
+
+    background: rgba(120,63,64,.13);
+
+    transform: rotate(45deg);
+}
+
+.envelope-body::after {
+    content: "";
+
+    position: absolute;
+
+    width: 240px;
+    height: 240px;
+
+    right: -160px;
+    bottom: -115px;
+
+    background: rgba(120,63,64,.13);
+
+    transform: rotate(45deg);
+}
+
+/* triángulo frontal */
+
+.envelope-front-left {
+    position: absolute;
+
+    left: 0;
+    bottom: 0;
+
+    width: 52%;
+    height: 100%;
+
+    background: linear-gradient(
+        145deg,
+        rgba(190,140,130,.28),
+        rgba(130,75,70,.15)
+    );
+
+    clip-path: polygon(
+        0 0,
+        100% 100%,
+        0 100%
+    );
+
+    z-index: 3;
+}
+
+.envelope-front-right {
+    position: absolute;
+
+    right: 0;
+    bottom: 0;
+
+    width: 52%;
+    height: 100%;
+
+    background: linear-gradient(
+        215deg,
+        rgba(190,140,130,.28),
+        rgba(130,75,70,.15)
+    );
+
+    clip-path: polygon(
+        100% 0,
+        0 100%,
+        100% 100%
+    );
+
+    z-index: 3;
+}
+
+/* carta dentro */
+
+.letter-paper {
+    position: absolute;
+
+    width: 250px;
+    height: 165px;
+
+    left: 50%;
+    top: 15px;
+
+    transform:
+        translateX(-50%)
+        translateY(45px);
+
+    background:
+        linear-gradient(
+            145deg,
+            #fff7ed,
+            #f0dfd0
+        );
+
+    box-shadow:
+        0 5px 15px rgba(0,0,0,.18);
+
+    z-index: 1;
+
+    transition:
+        transform 1s cubic-bezier(.2,.8,.2,1);
+}
+
+.letter-paper::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 9px;
+
+    border: 1px solid rgba(100,60,50,.16);
+}
+
+/* solapa */
+
+.envelope-flap {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 135px;
+
+    background:
+        linear-gradient(
+            150deg,
+            #f1d7cc,
+            #d4aaa0
+        );
+
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        50% 100%
+    );
+
+    transform-origin: top center;
+
+    transition:
+        transform 1s cubic-bezier(.6,-.15,.25,1.15);
+
+    z-index: 5;
+}
+
+/* abrir */
+
+.envelope.opened .envelope-flap {
+    transform: rotateX(180deg);
+}
+
+.envelope.opened .letter-paper {
+    transform:
+        translateX(-50%)
+        translateY(-95px);
+}
+
+/* sello */
+
+.envelope-seal {
+    position: absolute;
+
+    left: 50%;
+    top: 112px;
+
+    width: 48px;
+    height: 48px;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #a34d5c,
+            #6d2634 65%,
+            #4b1721
+        );
+
+    border: 2px solid #a75b67;
+
+    box-shadow:
+        0 4px 7px rgba(0,0,0,.22);
+
+    z-index: 7;
+
+    transition: opacity .35s ease;
+}
+
+.envelope-seal::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 8px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,255,255,.35);
+}
+
+.envelope-seal::after {
+    content: "";
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 11px;
+    height: 11px;
+
+    transform:
+        translate(-50%, -50%)
+        rotate(45deg);
+
+    border: 1px solid rgba(255,220,220,.45);
+}
+
+.envelope.opened .envelope-seal {
+    opacity: 0;
+}
+
+/* indicación */
+
+.letter-hint {
+    position: relative;
+
+    margin-top: 42px;
+
+    color: #d7b7b2;
+
+    font-size: 15px;
+
+    letter-spacing: 1px;
+
+    animation:
+        hintPulse 2.2s ease-in-out infinite;
+
+    z-index: 3;
+}
+
+@keyframes hintPulse {
+
+    0%,
+    100% {
+        opacity: .5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+
+/* =====================================================
+   INTRO
+===================================================== */
+
+.intro-content {
+    width: min(90%, 620px);
+
+    text-align: center;
+
+    padding: 30px;
+}
+
+.intro-content h1 {
+    font-size: clamp(34px, 8vw, 54px);
+
+    line-height: 1.1;
+
+    font-weight: normal;
+
+    color: #f3d7d1;
+
+    margin-bottom: 32px;
+
+    letter-spacing: .5px;
+}
+
+.intro-content p {
+    font-size: clamp(16px, 4.3vw, 19px);
+
+    line-height: 1.8;
+
+    color: #e4cbc6;
+
+    margin-bottom: 38px;
+}
+
+.main-button {
+    position: relative;
+
+    border: 1px solid rgba(225,177,169,.5);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(139,51,67,.65),
+            rgba(89,29,43,.65)
+        );
+
+    color: #f8e8e3;
+
+    padding: 15px 30px;
+
+    border-radius: 30px;
+
+    font-family: inherit;
+
+    font-size: 16px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.2);
+
+    transition:
+        transform .3s ease,
+        background .3s ease,
+        box-shadow .3s ease;
+}
+
+.main-button:hover {
+    transform: translateY(-2px);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(160,59,78,.8),
+            rgba(104,33,50,.8)
+        );
+
+    box-shadow:
+        0 12px 25px rgba(0,0,0,.3);
+}
+
+
+/* =====================================================
+   RAMO
+===================================================== */
+
+#bouquetScreen {
+    overflow: hidden;
+}
+
+.bouquet-scene {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.bouquet-title {
+    position: absolute;
+
+    top: 7%;
+
+    width: 100%;
+
+    text-align: center;
+
+    font-size: clamp(25px, 6vw, 40px);
+
+    font-weight: normal;
+
+    color: #f2d6d1;
+
+    opacity: 0;
+
+    animation:
+        titleAppear 1s ease forwards;
+
+    animation-delay: .4s;
+}
+
+@keyframes titleAppear {
+
+    to {
+        opacity: 1;
+    }
+}
+
+.bouquet {
+    position: relative;
+
+    width: 370px;
+    height: 610px;
+
+    transform:
+        translateY(25px);
+}
+
+
+/* =====================================================
+   TALLOS
+===================================================== */
+
+.stem {
+    position: absolute;
+
+    width: 7px;
+    height: 310px;
+
+    left: 50%;
+    bottom: 130px;
+
+    border-radius: 8px;
+
+    background:
+        linear-gradient(
+            to right,
+            #203d28,
+            #4b7546,
+            #203b27
+        );
+
+    transform-origin: bottom center;
+
+    opacity: 0;
+
+    animation:
+        stemAppear .8s ease forwards;
+}
+
+.stem:nth-child(1) {
+    transform:
+        translateX(-50%)
+        rotate(-22deg);
+
+    animation-delay: .3s;
+}
+
+.stem:nth-child(2) {
+    transform:
+        translateX(-50%)
+        rotate(-15deg);
+
+    animation-delay: .4s;
+}
+
+.stem:nth-child(3) {
+    transform:
+        translateX(-50%)
+        rotate(-8deg);
+
+    animation-delay: .5s;
+}
+
+.stem:nth-child(4) {
+    transform:
+        translateX(-50%)
+        rotate(0deg);
+
+    animation-delay: .6s;
+}
+
+.stem:nth-child(5) {
+    transform:
+        translateX(-50%)
+        rotate(8deg);
+
+    animation-delay: .7s;
+}
+
+.stem:nth-child(6) {
+    transform:
+        translateX(-50%)
+        rotate(15deg);
+
+    animation-delay: .8s;
+}
+
+.stem:nth-child(7) {
+    transform:
+        translateX(-50%)
+        rotate(22deg);
+
+    animation-delay: .9s;
+}
+
+@keyframes stemAppear {
+
+    from {
+        opacity: 0;
+        height: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+/* =====================================================
+   HOJAS
+===================================================== */
+
+.leaf {
+    position: absolute;
+
+    width: 55px;
+    height: 25px;
+
+    border-radius:
+        100%
+        0
+        100%
+        0;
+
+    background:
+        linear-gradient(
+            135deg,
+            #5b8754,
+            #294c2e
+        );
+
+    opacity: 0;
+
+    z-index: 5;
+
+    box-shadow:
+        inset -5px -4px 8px rgba(0,0,0,.18);
+
+    animation:
+        leafAppear .7s ease forwards;
+}
+
+.leaf::after {
+    content: "";
+
+    position: absolute;
+
+    width: 39px;
+    height: 1px;
+
+    background:
+        rgba(200,225,185,.4);
+
+    left: 8px;
+    top: 12px;
+
+    transform: rotate(-8deg);
+}
+
+.l1 {
+    left: 50px;
+    bottom: 285px;
+
+    transform: rotate(-30deg);
+
+    animation-delay: 1.1s;
+}
+
+.l2 {
+    left: 78px;
+    bottom: 225px;
+
+    transform:
+        rotate(15deg)
+        scale(.9);
+
+    animation-delay: 1.2s;
+}
+
+.l3 {
+    left: 120px;
+    bottom: 315px;
+
+    transform:
+        rotate(-25deg)
+        scale(.8);
+
+    animation-delay: 1.3s;
+}
+
+.l4 {
+    right: 50px;
+    bottom: 270px;
+
+    transform:
+        rotate(205deg);
+
+    animation-delay: 1.4s;
+}
+
+.l5 {
+    right: 78px;
+    bottom: 215px;
+
+    transform:
+        rotate(165deg)
+        scale(.9);
+
+    animation-delay: 1.5s;
+}
+
+.l6 {
+    right: 115px;
+    bottom: 310px;
+
+    transform:
+        rotate(205deg)
+        scale(.8);
+
+    animation-delay: 1.6s;
+}
+
+.l7 {
+    left: 150px;
+    bottom: 195px;
+
+    transform:
+        rotate(25deg)
+        scale(.75);
+
+    animation-delay: 1.7s;
+}
+
+.l8 {
+    right: 145px;
+    bottom: 195px;
+
+    transform:
+        rotate(155deg)
+        scale(.75);
+
+    animation-delay: 1.8s;
+}
+
+@keyframes leafAppear {
+
+    from {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+/* =====================================================
+   ROSAS
+===================================================== */
+
+.rose {
+    position: absolute;
+
+    width: 88px;
+    height: 88px;
+
+    opacity: 0;
+
+    z-index: 10;
+
+    animation:
+        roseAppear .9s cubic-bezier(.2,.8,.2,1)
+        forwards;
+}
+
+.rose-head {
+    position: absolute;
+
+    inset: 0;
+
+    border-radius: 50%;
+
+    background:
+
+        radial-gradient(
+            circle at 50% 50%,
+            #51111b 0 8%,
+            #7f1f30 9% 18%,
+            transparent 19%
+        ),
+
+        radial-gradient(
+            circle at 38% 35%,
+            #ca4c5b 0 18%,
+            #922b3d 19% 31%,
+            transparent 32%
+        ),
+
+        radial-gradient(
+            circle at 65% 35%,
+            #b93d4f 0 19%,
+            #7d2031 20% 32%,
+            transparent 33%
+        ),
+
+        radial-gradient(
+            circle at 35% 65%,
+            #aa3546 0 20%,
+            #721c2b 21% 34%,
+            transparent 35%
+        ),
+
+        radial-gradient(
+            circle at 66% 65%,
+            #bd4353 0 20%,
+            #771d2d 21% 35%,
+            transparent 36%
+        ),
+
+        radial-gradient(
+            circle,
+            #922737 0 48%,
+            #651622 49% 72%,
+            #431019 73% 100%
+        );
+
+    box-shadow:
+        0 8px 12px rgba(0,0,0,.3),
+        inset 4px 4px 12px rgba(255,140,150,.18);
+}
+
+.rose-head::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 12px;
+
+    border-radius: 50%;
+
+    border:
+        5px solid rgba(210,78,93,.45);
+
+    transform: rotate(30deg);
+}
+
+.rose-head::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 23px;
+
+    border-radius: 50%;
+
+    border:
+        4px solid rgba(66,9,17,.55);
+
+    transform: rotate(-25deg);
+}
+
+@keyframes roseAppear {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(40px)
+            scale(.2)
+            rotate(-20deg);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1)
+            rotate(0);
+    }
+}
+
+
+/* posiciones */
+
+.r1 {
+    left: 142px;
+    bottom: 340px;
+
+    animation-delay: 1.4s;
+
+    transform: scale(1.15);
+}
+
+.r2 {
+    left: 83px;
+    bottom: 318px;
+
+    animation-delay: 1.55s;
+
+    transform: scale(.9);
+}
+
+.r3 {
+    right: 83px;
+    bottom: 320px;
+
+    animation-delay: 1.7s;
+
+    transform: scale(.92);
+}
+
+.r4 {
+    left: 45px;
+    bottom: 260px;
+
+    animation-delay: 1.85s;
+
+    transform: scale(.82);
+}
+
+.r5 {
+    right: 42px;
+    bottom: 260px;
+
+    animation-delay: 2s;
+
+    transform: scale(.82);
+}
+
+.r6 {
+    left: 108px;
+    bottom: 270px;
+
+    animation-delay: 2.15s;
+
+    transform: scale(.85);
+}
+
+.r7 {
+    right: 105px;
+    bottom: 275px;
+
+    animation-delay: 2.3s;
+
+    transform: scale(.85);
+}
+
+.r8 {
+    left: 145px;
+    bottom: 245px;
+
+    animation-delay: 2.45s;
+
+    transform: scale(.82);
+}
+
+.r9 {
+    left: 68px;
+    bottom: 220px;
+
+    animation-delay: 2.6s;
+
+    transform: scale(.72);
+}
+
+.r10 {
+    right: 65px;
+    bottom: 220px;
+
+    animation-delay: 2.75s;
+
+    transform: scale(.72);
+}
+
+.r11 {
+    left: 125px;
+    bottom: 200px;
+
+    animation-delay: 2.9s;
+
+    transform: scale(.68);
+}
+
+.r12 {
+    right: 120px;
+    bottom: 200px;
+
+    animation-delay: 3.05s;
+
+    transform: scale(.68);
+}
+
+.r13 {
+    left: 28px;
+    bottom: 305px;
+
+    animation-delay: 3.2s;
+
+    transform: scale(.63);
+}
+
+.r14 {
+    right: 28px;
+    bottom: 300px;
+
+    animation-delay: 3.35s;
+
+    transform: scale(.63);
+}
+
+.r15 {
+    left: 148px;
+    bottom: 190px;
+
+    animation-delay: 3.5s;
+
+    transform: scale(.62);
+}
+
+
+/* =====================================================
+   ENVOLTORIO DEL RAMO
+===================================================== */
+
+.wrapper {
+    position: absolute;
+
+    left: 50%;
+    bottom: 20px;
+
+    transform:
+        translateX(-50%);
+
+    width: 310px;
+    height: 270px;
+
+    z-index: 20;
+
+    opacity: 0;
+
+    animation:
+        wrapperAppear 1.1s ease forwards;
+
+    animation-delay: 3.7s;
+}
+
+.wrapper-paper {
+    position: absolute;
+
+    left: 50%;
+    bottom: 0;
+
+    transform:
+        translateX(-50%);
+
+    width: 100%;
+    height: 240px;
+
+    background:
+
+        linear-gradient(
+            110deg,
+            rgba(255,255,255,.15),
+            transparent 20%,
+            rgba(255,255,255,.08) 45%,
+            transparent 60%
+        ),
+
+        linear-gradient(
+            145deg,
+            #ead8cc,
+            #b99690
+        );
+
+    clip-path:
+        polygon(
+            10% 0,
+            90% 0,
+            100% 100%,
+            0 100%
+        );
+
+    box-shadow:
+        0 15px 22px rgba(0,0,0,.3),
+        inset 0 0 30px rgba(90,40,40,.15);
+}
+
+.wrapper-paper::before {
+    content: "";
+
+    position: absolute;
+
+    width: 100%;
+    height: 100%;
+
+    background:
+        repeating-linear-gradient(
+            80deg,
+            transparent 0 25px,
+            rgba(255,255,255,.08) 26px,
+            transparent 28px
+        );
+
+    opacity: .5;
+}
+
+.wrapper-fold {
+    position: absolute;
+
+    bottom: 0;
+    left: 50%;
+
+    width: 85%;
+    height: 150px;
+
+    transform:
+        translateX(-50%);
+
+    background:
+        linear-gradient(
+            145deg,
+            #d8beb3,
+            #af8c86
+        );
+
+    clip-path:
+        polygon(
+            50% 0,
+            100% 100%,
+            0 100%
+        );
+
+    opacity: .8;
+}
+
+
+/* =====================================================
+   CINTA
+===================================================== */
+
+.ribbon {
+    position: absolute;
+
+    left: 50%;
+    bottom: 95px;
+
+    transform:
+        translateX(-50%);
+
+    width: 90px;
+    height: 55px;
+
+    z-index: 30;
+}
+
+.ribbon-left,
+.ribbon-right {
+    position: absolute;
+
+    width: 48px;
+    height: 42px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #7c3341,
+            #451620
+        );
+
+    border:
+        1px solid rgba(255,180,180,.25);
+}
+
+.ribbon-left {
+    left: 0;
+
+    transform:
+        rotate(25deg);
+
+    border-radius:
+        8px
+        35px
+        8px
+        30px;
+}
+
+.ribbon-right {
+    right: 0;
+
+    transform:
+        rotate(-25deg);
+
+    border-radius:
+        35px
+        8px
+        30px
+        8px;
+}
+
+.ribbon-center {
+    position: absolute;
+
+    width: 29px;
+    height: 29px;
+
+    left: 30px;
+    top: 8px;
+
+    border-radius: 50%;
+
+    background:
+        #913d4b;
+
+    box-shadow:
+        0 4px 8px rgba(0,0,0,.25);
+}
+
+.ribbon-tail-left,
+.ribbon-tail-right {
+    position: absolute;
+
+    width: 42px;
+    height: 90px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #71303d,
+            #42151f
+        );
+
+    top: 20px;
+}
+
+.ribbon-tail-left {
+    left: 17px;
+
+    transform:
+        rotate(10deg);
+
+    clip-path:
+        polygon(
+            0 0,
+            100% 0,
+            82% 100%,
+            45% 83%,
+            0 100%
+        );
+}
+
+.ribbon-tail-right {
+    right: 17px;
+
+    transform:
+        rotate(-10deg);
+
+    clip-path:
+        polygon(
+            0 0,
+            100% 0,
+            100% 100%,
+            55% 83%,
+            18% 100%
+        );
+}
+
+
+/* =====================================================
+   TARJETA PEQUEÑA DEL RAMO
+===================================================== */
+
+.note {
+    position: absolute;
+
+    right: -7px;
+    bottom: 162px;
+
+    width: 96px;
+    height: 72px;
+
+    padding: 13px 8px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fff4df,
+            #e7d0b0
+        );
+
+    color: #4a2925;
+
+    z-index: 40;
+
+    transform:
+        rotate(8deg);
+
+    cursor: pointer;
+
+    box-shadow:
+        0 7px 12px rgba(0,0,0,.3);
+
+    opacity: 0;
+
+    animation:
+        noteAppear .8s ease forwards;
+
+    animation-delay: 4.2s;
+
+    transition:
+        transform .3s ease;
+}
+
+.note:hover {
+    transform:
+        rotate(4deg)
+        scale(1.05);
+}
+
+.note::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 5px;
+
+    border:
+        1px solid rgba(100,60,40,.25);
+}
+
+.note span {
+    position: relative;
+
+    display: block;
+
+    text-align: center;
+
+    font-size: 16px;
+
+    margin-top: 10px;
+}
+
+@keyframes noteAppear {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(20px)
+            rotate(15deg);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            rotate(8deg);
+    }
+}
+
+@keyframes wrapperAppear {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateX(-50%)
+            translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateX(-50%)
+            translateY(0);
+    }
+}
+
+
+/* =====================================================
+   CARTA ABIERTA
+===================================================== */
+
+.note-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 100;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        rgba(8,4,6,.78);
+
+    backdrop-filter:
+        blur(7px);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+        opacity .5s ease,
+        visibility .5s ease;
+}
+
+.note-overlay.active {
+    opacity: 1;
+
+    visibility: visible;
+
+    pointer-events: auto;
+}
+
+.paper-note {
+    position: relative;
+
+    width: min(86%, 440px);
+
+    min-height: 285px;
+
+    padding: 70px 35px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.3),
+            transparent 35%
+        ),
+        #f4e6cc;
+
+    color: #39221e;
+
+    box-shadow:
+        0 25px 50px rgba(0,0,0,.5);
+
+    transform:
+        scale(.75)
+        rotate(-3deg);
+
+    transition:
+        transform .6s cubic-bezier(.2,.8,.2,1);
+}
+
+.note-overlay.active .paper-note {
+    transform:
+        scale(1)
+        rotate(0);
+}
+
+.paper-note::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 12px;
+
+    border:
+        1px solid rgba(100,65,50,.25);
+}
+
+.paper-note h2 {
+    position: relative;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size:
+        clamp(34px, 9vw, 52px);
+
+    font-weight:
+        normal;
+
+    color:
+        #6e2633;
+}
+
+.close-note {
+    position: absolute;
+
+    top: 17px;
+    right: 20px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #6e4a43;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 27px;
+
+    cursor: pointer;
+
+    z-index: 5;
+}
+
+
+/* =====================================================
+   PÉTALOS
+===================================================== */
+
+.petal {
+    position: fixed;
+
+    top: -20px;
+
+    width: 7px;
+    height: 7px;
+
+    background:
+        #9c4050;
+
+    transform:
+        rotate(45deg);
+
+    opacity: .6;
+
+    pointer-events: none;
+
+    z-index: 2;
+
+    animation:
+        fall linear forwards;
+}
+
+@keyframes fall {
+
+    to {
+        transform:
+            translateY(110vh)
+            rotate(360deg);
+
+        opacity: 0;
+    }
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 420px) {
+
+    .envelope {
+        width: 290px;
+        height: 195px;
+    }
+
+    .envelope-flap {
+        height: 122px;
+    }
+
+    .envelope-seal {
+        top: 100px;
+    }
+
+    .letter-paper {
+        width: 225px;
+        height: 145px;
+    }
+
+    .intro-content {
+        padding: 20px;
+    }
+
+    .intro-content h1 {
+        font-size: 35px;
+    }
+
+    .intro-content p {
+        line-height: 1.65;
+    }
+
+    .bouquet {
+        transform:
+            scale(.88)
+            translateY(25px);
+    }
+}
+
+@media (max-width: 360px) {
+
+    .envelope {
+        transform:
+            scale(.88);
+    }
+
+    .intro-content h1 {
+        font-size: 31px;
+    }
+
+    .intro-content p {
+        font-size: 15px;
+    }
+
+    .bouquet {
+        transform:
+            scale(.70)
+            translateY(35px);
+    }
+}
+
+@media (max-height: 720px) {
+
+    .bouquet {
+        transform:
+            scale(.76)
+            translateY(35px);
+    }
+
+    .bouquet-title {
+        top: 4%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+
+<!-- =====================================================
+     SOBRE
+===================================================== -->
+
+<section id="letterScreen" class="screen active">
+
+    <div class="letter-scene">
+
+        <div
+            id="envelope"
+            class="envelope"
+            onclick="openLetter()"
+        >
+
+            <div class="letter-paper"></div>
+
+            <div class="envelope-body"></div>
+
+            <div class="envelope-front-left"></div>
+
+            <div class="envelope-front-right"></div>
+
+            <div class="envelope-flap"></div>
+
+            <div class="envelope-seal"></div>
+
+        </div>
+
+        <div class="letter-hint">
+            Haz clic para abrir
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     TEXTO
+===================================================== -->
+
+<section id="introScreen" class="screen">
+
+    <div class="intro-content">
+
+        <h1>
+            Volvamos a conquistarnos
+        </h1>
+
+        <p>
+            No soy muy bueno para las manualidades, y si intentara hacer un ramo de flores probablemente no quedaría precisamente como esperaba.
+            <br><br>
+            Pero igual quería hacer algo diferente para ti. Así que pensé en hacer mi propia versión de un ramo, de una forma un poco distinta y aprovechando lo que sé hacer.
+            <br><br>
+            Puede que no sea un ramo hecho a mano, pero sí es algo que hice pensando en ti y dedicándole un poquito de tiempo.
+        </p>
+
+        <button
+            class="main-button"
+            onclick="showBouquet()"
+        >
+            Ver lo que hice
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     RAMO
+===================================================== -->
+
+<section id="bouquetScreen" class="screen">
+
+    <div class="bouquet-scene">
+
+        <h2 class="bouquet-title">
+            Un pequeño detalle para ti
+        </h2>
+
+        <div class="bouquet">
+
+
+            <!-- TALLOS -->
+
+            <div class="stem"></div>
+            <div class="stem"></div>
+            <div class="stem"></div>
+            <div class="stem"></div>
+            <div class="stem"></div>
+            <div class="stem"></div>
+            <div class="stem"></div>
+
+
+            <!-- HOJAS -->
+
+            <div class="leaf l1"></div>
+            <div class="leaf l2"></div>
+            <div class="leaf l3"></div>
+            <div class="leaf l4"></div>
+            <div class="leaf l5"></div>
+            <div class="leaf l6"></div>
+            <div class="leaf l7"></div>
+            <div class="leaf l8"></div>
+
+
+            <!-- ROSAS -->
+
+            <div class="rose r1">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r2">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r3">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r4">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r5">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r6">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r7">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r8">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r9">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r10">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r11">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r12">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r13">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r14">
+                <div class="rose-head"></div>
+            </div>
+
+            <div class="rose r15">
+                <div class="rose-head"></div>
+            </div>
+
+
+            <!-- ENVOLTORIO -->
+
+            <div class="wrapper">
+
+                <div class="wrapper-paper"></div>
+
+                <div class="wrapper-fold"></div>
+
+
+                <!-- CINTA -->
+
+                <div class="ribbon">
+
+                    <div class="ribbon-left"></div>
+
+                    <div class="ribbon-right"></div>
+
+                    <div class="ribbon-center"></div>
+
+                    <div class="ribbon-tail-left"></div>
+
+                    <div class="ribbon-tail-right"></div>
+
+                </div>
+
+
+                <!-- CARTITA -->
+
+                <div
+                    class="note"
+                    onclick="openNote()"
+                >
+                    <span>
+                        Para ti
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CARTA DEL RAMO ABIERTA
+===================================================== -->
+
+<div
+    id="noteOverlay"
+    class="note-overlay"
+    onclick="closeNote(event)"
+>
+
+    <div class="paper-note">
+
+        <button
+            class="close-note"
+            onclick="closeNote(event)"
+        >
+            ×
+        </button>
+
+        <h2>
+            Monita❤️
+        </h2>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   ABRIR SOBRE
+===================================================== */
+
+function openLetter() {
+
+    const envelope =
+        document.getElementById("envelope");
+
+    envelope.classList.add("opened");
+
+    setTimeout(() => {
+
+        document
+            .getElementById("letterScreen")
+            .classList.remove("active");
+
+        document
+            .getElementById("introScreen")
+            .classList.add("active");
+
+    }, 1000);
+}
+
+
+/* =====================================================
+   MOSTRAR RAMO
+===================================================== */
+
+function showBouquet() {
+
+    document
+        .getElementById("introScreen")
+        .classList.remove("active");
+
+    document
+        .getElementById("bouquetScreen")
+        .classList.add("active");
+
+    startPetals();
+}
+
+
+/* =====================================================
+   ABRIR CARTA
+===================================================== */
+
+function openNote() {
+
+    document
+        .getElementById("noteOverlay")
+        .classList.add("active");
+}
+
+
+/* =====================================================
+   CERRAR CARTA
+===================================================== */
+
+function closeNote(event) {
+
+    if (
+        event.target.classList.contains("note-overlay") ||
+        event.target.classList.contains("close-note")
+    ) {
+
+        document
+            .getElementById("noteOverlay")
+            .classList.remove("active");
+    }
+}
+
+
+/* =====================================================
+   PÉTALOS
+===================================================== */
+
+let petalsStarted = false;
+
+function startPetals() {
+
+    if (petalsStarted) {
+        return;
+    }
+
+    petalsStarted = true;
+
+    setInterval(() => {
+
+        const petal =
+            document.createElement("div");
+
+        petal.className = "petal";
+
+        petal.style.left =
+            Math.random() * 100 + "vw";
+
+        petal.style.animationDuration =
+            (5 + Math.random() * 5) + "s";
+
+        petal.style.opacity =
+            .25 + Math.random() * .45;
+
+        document.body.appendChild(petal);
+
+        setTimeout(() => {
+
+            petal.remove();
+
+        }, 10000);
+
+    }, 900);
+}
+
+</script>
+
+</body>
+</html>
